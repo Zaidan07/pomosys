@@ -1,8 +1,8 @@
-import { Inter, Roboto } from "next/font/google";
+import { Inter, Roboto_Flex } from "next/font/google";
 import "./globals.css";
 
 // const inter = Inter({ subsets: ["latin"] });
-const roboto = Roboto({
+const roboto = Roboto_Flex({
   weight: ['400', '700'],
   subsets: ['latin'],
 })

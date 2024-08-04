@@ -1,93 +1,129 @@
 "use client";
-import React from 'react';
-import { useState, useEffect } from 'react';
+import React from "react";
+import { useState, useEffect } from "react";
 import {
   TimerContainer,
   TimerDisplay,
   ButtonContainer,
   TimerButton,
   ModeButton,
-} from './Timer.styled';
-import { Roboto } from 'next/font/google';
-import {FaPlay, FaPause} from "react-icons/fa"
-
-const roboto = Roboto({
-  weight: ['400', '700'],
-  subsets: ['latin'],
-})
+  ButtonDisplay,
+} from "./Timer.styled";
+import { FaPlay, FaPause } from "react-icons/fa";
+import { PiBrainLight, PiCoffee } from "react-icons/pi";
+import { TbPlayerTrackNextFilled } from "react-icons/tb";
 
 
-export default function Timer () {
+const PomoMode = {
+  FOCUS: "focus",
+  SHORT_BREAK: "shortBreak",
+  LONG_BREAK: "longBreak",
+};
+
+const Status = {
+  PAUSED: "",
+  RUNNING: null,
+};
+
+export default function Timer() {
+  const [mode, setMode] = useState(PomoMode.FOCUS);
+  const [status, setStatus] = useState(Status.PAUSED);
   const [time, setTime] = useState(25 * 60);
-  const [isActive, setIsActive] = useState(false);
-  const [mode, setMode] = useState('focus');
 
   useEffect(() => {
     let interval = null;
-    if (isActive) {
+    if (status === Status.RUNNING) {
       interval = setInterval(() => {
         setTime((prevTime) => (prevTime > 0 ? prevTime - 1 : 0));
       }, 1000);
-    } else if (!isActive && time !== 0) {
+    } else if (status === Status.PAUSED && time !== 0) {
       clearInterval(interval);
     }
     return () => clearInterval(interval);
-  }, [isActive, time]);
+  }, [status, time]);
 
   const handleStart = () => {
-    setIsActive(true);
+    setStatus(Status.RUNNING);
   };
 
   const handlePause = () => {
-    setIsActive(false);
+    setStatus(Status.PAUSED);
   };
 
   const handleReset = () => {
-    setIsActive(false);
-    if (mode === 'focus') setTime(25 * 60);
-    else if (mode === 'shortBreak') setTime(5 * 60);
-    else if (mode === 'longBreak') setTime(15 * 60);
+    setStatus(Status.PAUSED);
+    if (mode === PomoMode.FOCUS) setTime(25 * 60);
+    else if (mode === PomoMode.SHORT_BREAK) setTime(5 * 60);
+    else if (mode === PomoMode.LONG_BREAK) setTime(15 * 60);
   };
 
-  const handleModeChange = (newMode) => {
-    setMode(newMode);
-    setIsActive(false);
-    if (newMode === 'focus') setTime(25 * 60);
-    else if (newMode === 'shortBreak') setTime(5 * 60);
-    else if (newMode === 'longBreak') setTime(15 * 60);
+  const handleModeChange = () => {
+    setStatus(Status.PAUSED);
+    if (mode === PomoMode.FOCUS) {
+      setMode(PomoMode.SHORT_BREAK);
+      setTime(5 * 60);
+    } else if (mode === PomoMode.SHORT_BREAK) {
+      setMode(PomoMode.LONG_BREAK);
+      setTime(15 * 60);
+    } else {
+      setMode(PomoMode.FOCUS);
+      setTime(25 * 60);
+    }
   };
-
-//   const formatTime = (seconds) => {
-//     const minutes = Math.floor(seconds / 60);
-//     const remainingSeconds = seconds % 60;
-//     return `${minutes < 10 ? '0' : ''}${minutes}\n${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-//   };
+  //   const formatTime = (seconds) => {
+  //     const minutes = Math.floor(seconds / 60);
+  //     const remainingSeconds = seconds % 60;
+  //     return `${minutes < 10 ? '0' : ''}${minutes}\n${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+  //   };
 
   return (
     <TimerContainer>
-      <ModeButton onClick={() => handleModeChange('focus')} active={mode === 'focus'}>
-        Focus
-      </ModeButton>
-      <ModeButton onClick={() => handleModeChange('shortBreak')} active={mode === 'shortBreak'}>
-        Short Break
-      </ModeButton>
-      <ModeButton onClick={() => handleModeChange('longBreak')} active={mode === 'longBreak'}>
-        Long Break
-      </ModeButton>
+      <ButtonDisplay>
+        <ModeButton
+          onClick={() => handleModeChange("focus")}
+          active={mode === "focus"}
+        >
+          <PiBrainLight size={32} /> Focus
+        </ModeButton>
+        <ModeButton
+          onClick={() => handleModeChange("shortBreak")}
+          active={mode === "shortBreak"}
+        >
+          <PiCoffee size={32} />
+          Short Break
+        </ModeButton>
+        <ModeButton
+          onClick={() => handleModeChange("longBreak")}
+          active={mode === "longBreak"}
+        >
+          <PiCoffee size={32} /> Long Break
+        </ModeButton>
+      </ButtonDisplay>
       {/* {formatTime(time)} */}
-      <TimerDisplay className={roboto.className}>
-      <div>{Math.floor(time / 60).toString().padStart(2, '0')}</div>
-      <div>{(time % 60).toString().padStart(2, '0')}</div>
+      <TimerDisplay>
+        <div>
+          {Math.floor(time / 60)
+            .toString()
+            .padStart(2, "0")}
+        </div>
+        <div>{(time % 60).toString().padStart(2, "0")}</div>
       </TimerDisplay>
       <ButtonContainer>
-        {!isActive ? (
-          <TimerButton onClick={handleStart}><FaPlay/></TimerButton>
+        <TimerButton onClick={handleModeChange}>
+          <TbPlayerTrackNextFilled />
+          {status}
+        </TimerButton>
+        {status === Status.PAUSED ? (
+          <TimerButton onClick={handleStart}>
+            <FaPlay />
+          </TimerButton>
         ) : (
-          <TimerButton onClick={handlePause}><FaPause/></TimerButton>
+          <TimerButton onClick={handlePause}>
+            <FaPause />
+          </TimerButton>
         )}
         <TimerButton onClick={handleReset}>Reset</TimerButton>
       </ButtonContainer>
     </TimerContainer>
   );
-};
-
+}
