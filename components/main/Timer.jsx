@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   TimerContainer,
   TimerDisplay,
@@ -12,7 +12,8 @@ import {
 import { FaPlay, FaPause } from "react-icons/fa";
 import { PiBrainLight, PiCoffee } from "react-icons/pi";
 import { TbPlayerTrackNextFilled } from "react-icons/tb";
-
+import { LuRefreshCcw } from "react-icons/lu";
+import Label from "../label/Label";
 
 const PomoMode = {
   FOCUS: "focus",
@@ -25,10 +26,27 @@ const Status = {
   RUNNING: null,
 };
 
-export default function Timer() {
-  const [mode, setMode] = useState(PomoMode.FOCUS);
+export default function Timer({ modes, actives }) {
+  const [mode, setMode] = useState("focus");
   const [status, setStatus] = useState(Status.PAUSED);
   const [time, setTime] = useState(25 * 60);
+  const [isReset, setIsRest] = useState(false);
+  const [bgPage, setBgPage] = useState("#0d0404");
+  const [startBg, setStartBg] = useState("#a33030");
+  const [btBgRs, setBtBgRs] = useState("#471515");
+
+  const audioRef = useRef(new Audio("/assets/audio.mp3"));
+
+
+
+  useEffect(() => {
+    if (time === 0 && !isReset) {
+      audioRef.current.play();
+    } else {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+  }, [time, isReset]);
 
   useEffect(() => {
     let interval = null;
@@ -39,8 +57,10 @@ export default function Timer() {
     } else if (status === Status.PAUSED && time !== 0) {
       clearInterval(interval);
     }
+
     return () => clearInterval(interval);
   }, [status, time]);
+
 
   const handleStart = () => {
     setStatus(Status.RUNNING);
@@ -51,55 +71,66 @@ export default function Timer() {
   };
 
   const handleReset = () => {
+    setIsRest(true);
     setStatus(Status.PAUSED);
-    if (mode === PomoMode.FOCUS) setTime(25 * 60);
-    else if (mode === PomoMode.SHORT_BREAK) setTime(5 * 60);
-    else if (mode === PomoMode.LONG_BREAK) setTime(15 * 60);
+    if (mode === "focus") setTime(25 * 60);
+    else if (mode === "shortBreak") setTime(5 * 0.60);
+    else if (mode === "longBreak") setTime(15 * 60);
+
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
   };
 
   const handleModeChange = () => {
     setStatus(Status.PAUSED);
-    if (mode === PomoMode.FOCUS) {
-      setMode(PomoMode.SHORT_BREAK);
-      setTime(5 * 60);
-    } else if (mode === PomoMode.SHORT_BREAK) {
-      setMode(PomoMode.LONG_BREAK);
+    if (mode === "focus") {
+      setMode("shortBreak");
+      setTime(5 * 0.60);
+      setBgPage("#040d06");
+      setStartBg("#328c45");
+      
+    } else if (mode === "shortBreak") {
+      setMode("longBreak");
+      setBgPage("#04090d");
+      setStartBg("#306ea3");
       setTime(15 * 60);
     } else {
-      setMode(PomoMode.FOCUS);
+      setMode("focus");
       setTime(25 * 60);
+      setBgPage("#0d0404");
+      setStartBg("#a33030");
     }
   };
-  //   const formatTime = (seconds) => {
-  //     const minutes = Math.floor(seconds / 60);
-  //     const remainingSeconds = seconds % 60;
-  //     return `${minutes < 10 ? '0' : ''}${minutes}\n${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
-  //   };
+
+
 
   return (
-    <TimerContainer>
-      <ButtonDisplay>
-        <ModeButton
-          onClick={() => handleModeChange("focus")}
+    <TimerContainer color={bgPage}>
+      {mode === PomoMode.FOCUS && (
+        <Label
+          icon={PiBrainLight}
+          text="Focus"
+          mode="focus"
           active={mode === "focus"}
-        >
-          <PiBrainLight size={32} /> Focus
-        </ModeButton>
-        <ModeButton
-          onClick={() => handleModeChange("shortBreak")}
+        />
+      )}
+      {mode === PomoMode.SHORT_BREAK && (
+        <Label
+          icon={PiCoffee}
+          text="Short Break"
+          mode="shortBreak"
           active={mode === "shortBreak"}
-        >
-          <PiCoffee size={32} />
-          Short Break
-        </ModeButton>
-        <ModeButton
-          onClick={() => handleModeChange("longBreak")}
+        />
+      )}
+      {mode === PomoMode.LONG_BREAK && (
+        <Label
+          icon={PiCoffee}
+          text="Long Break"
+          mode="longBreak"
           active={mode === "longBreak"}
-        >
-          <PiCoffee size={32} /> Long Break
-        </ModeButton>
-      </ButtonDisplay>
-      {/* {formatTime(time)} */}
+        />
+      )}
+
       <TimerDisplay>
         <div>
           {Math.floor(time / 60)
@@ -109,20 +140,20 @@ export default function Timer() {
         <div>{(time % 60).toString().padStart(2, "0")}</div>
       </TimerDisplay>
       <ButtonContainer>
-        <TimerButton onClick={handleModeChange}>
-          <TbPlayerTrackNextFilled />
-          {status}
+        <TimerButton buttonColor={btBgRs} onClick={handleModeChange}>
+          <TbPlayerTrackNextFilled size={20}/>
+          {status }
         </TimerButton>
-        {status === Status.PAUSED ? (
-          <TimerButton onClick={handleStart}>
-            <FaPlay />
+          <TimerButton buttonColor={startBg} onClick={status === Status.PAUSED ? handleStart : handlePause} isBig={true}>{status === Status.PAUSED ?  <FaPlay size={20}/>:<FaPause size={20}/>}
+           
           </TimerButton>
+        {/* {status === Status.PAUSED ? (
         ) : (
-          <TimerButton onClick={handlePause}>
-            <FaPause />
+          <TimerButton buttonColor={startBg} isBig={true} onClick={handlePause}>
+            <FaPause size={20}/>
           </TimerButton>
-        )}
-        <TimerButton onClick={handleReset}>Reset</TimerButton>
+        )} */}
+        <TimerButton buttonColor={btBgRs} onClick={handleReset}><LuRefreshCcw size={20}/></TimerButton>
       </ButtonContainer>
     </TimerContainer>
   );
