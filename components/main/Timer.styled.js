@@ -7,7 +7,7 @@ export const TimerContainer = styled.div`
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: ${(props) => props.color};
+  background-color: ${(props) => props.$color};
   user-select: none;
 `;
 
@@ -34,10 +34,10 @@ export const ButtonContainer = styled.div`
 `;
 
 export const TimerButton = styled.button`
-  height: ${(props) => (props.isBig ? "90px" : "80px")};
-  width: ${(props) => (props.isBig ? "130px" : "80px")};
+  height: ${(props) => (props.$isBig ? "90px" : "80px")};
+  width: ${(props) => (props.$isBig ? "130px" : "80px")};
   font-size: 32px;
-  background-color: ${(props) => props.buttonColor};
+  background-color: ${(props) => props.$buttonColor};
   border: none;
   border-radius: 24px;
   color: white;

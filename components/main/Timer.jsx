@@ -26,7 +26,7 @@ const Status = {
   RUNNING: null,
 };
 
-export default function Timer({ modes, actives }) {
+export default function Timer() {
   const [mode, setMode] = useState("focus");
   const [status, setStatus] = useState(Status.PAUSED);
   const [time, setTime] = useState(25 * 60);
@@ -35,17 +35,18 @@ export default function Timer({ modes, actives }) {
   const [startBg, setStartBg] = useState("#a33030");
   const [btBgRs, setBtBgRs] = useState("#471515");
 
-  const audioRef = useRef(new Audio("/assets/audio.mp3"));
+  const audioRef = useRef(null);
 
-
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      audioRef.current = new Audio("/assets/audio.mp3");
+    }
+  }, []);
 
   useEffect(() => {
     if (time === 0 && !isReset) {
       audioRef.current.play();
-    } else {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
+    }   
   }, [time, isReset]);
 
   useEffect(() => {
@@ -61,9 +62,9 @@ export default function Timer({ modes, actives }) {
     return () => clearInterval(interval);
   }, [status, time]);
 
-
   const handleStart = () => {
     setStatus(Status.RUNNING);
+    setIsRest(false)
   };
 
   const handlePause = () => {
@@ -73,9 +74,14 @@ export default function Timer({ modes, actives }) {
   const handleReset = () => {
     setIsRest(true);
     setStatus(Status.PAUSED);
-    if (mode === "focus") setTime(25 * 60);
-    else if (mode === "shortBreak") setTime(5 * 0.60);
-    else if (mode === "longBreak") setTime(15 * 60);
+    if (mode === "focus") {
+      setTime(25 * 60);
+      
+    } else if (mode === "shortBreak") {
+      setTime(5  * 0.6);
+    } else if (mode === "longBreak") {
+      setTime(15 * 60);
+    }
 
     audioRef.current.pause();
     audioRef.current.currentTime = 0;
@@ -85,49 +91,54 @@ export default function Timer({ modes, actives }) {
     setStatus(Status.PAUSED);
     if (mode === "focus") {
       setMode("shortBreak");
-      setTime(5 * 0.60);
+      setTime(5 * 0.6);
       setBgPage("#040d06");
       setStartBg("#328c45");
-      
+      setBtBgRs("#0f2c15");
+
     } else if (mode === "shortBreak") {
       setMode("longBreak");
       setBgPage("#04090d");
       setStartBg("#306ea3");
+      setBtBgRs("#0e2231");
+
       setTime(15 * 60);
     } else {
       setMode("focus");
       setTime(25 * 60);
       setBgPage("#0d0404");
       setStartBg("#a33030");
+      setBtBgRs("#471515");
     }
+
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
   };
 
-
-
   return (
-    <TimerContainer color={bgPage}>
+    <TimerContainer $color={bgPage}>
       {mode === PomoMode.FOCUS && (
         <Label
           icon={PiBrainLight}
           text="Focus"
-          mode="focus"
-          active={mode === "focus"}
+          $mode="focus"
+          $active={mode === "focus"}
         />
       )}
       {mode === PomoMode.SHORT_BREAK && (
         <Label
           icon={PiCoffee}
           text="Short Break"
-          mode="shortBreak"
-          active={mode === "shortBreak"}
+          $mode="shortBreak"
+          $active={mode === "shortBreak"}
         />
       )}
       {mode === PomoMode.LONG_BREAK && (
         <Label
           icon={PiCoffee}
           text="Long Break"
-          mode="longBreak"
-          active={mode === "longBreak"}
+          $mode="longBreak"
+          $active={mode === "longBreak"}
         />
       )}
 
@@ -140,20 +151,30 @@ export default function Timer({ modes, actives }) {
         <div>{(time % 60).toString().padStart(2, "0")}</div>
       </TimerDisplay>
       <ButtonContainer>
-        <TimerButton buttonColor={btBgRs} onClick={handleModeChange}>
-          <TbPlayerTrackNextFilled size={20}/>
-          {status }
+        <TimerButton $buttonColor={btBgRs} onClick={handleModeChange}>
+          <TbPlayerTrackNextFilled size={20} />
+          {status}
         </TimerButton>
-          <TimerButton buttonColor={startBg} onClick={status === Status.PAUSED ? handleStart : handlePause} isBig={true}>{status === Status.PAUSED ?  <FaPlay size={20}/>:<FaPause size={20}/>}
-           
-          </TimerButton>
+        <TimerButton
+          $buttonColor={startBg}
+          onClick={status === Status.PAUSED ? handleStart : handlePause}
+          $isBig={true}
+        >
+          {status === Status.PAUSED ? (
+            <FaPlay size={20} />
+          ) : (
+            <FaPause size={20} />
+          )}
+        </TimerButton>
         {/* {status === Status.PAUSED ? (
         ) : (
           <TimerButton buttonColor={startBg} isBig={true} onClick={handlePause}>
             <FaPause size={20}/>
           </TimerButton>
         )} */}
-        <TimerButton buttonColor={btBgRs} onClick={handleReset}><LuRefreshCcw size={20}/></TimerButton>
+        <TimerButton $buttonColor={btBgRs} onClick={handleReset}>
+          <LuRefreshCcw size={20} />
+        </TimerButton>
       </ButtonContainer>
     </TimerContainer>
   );

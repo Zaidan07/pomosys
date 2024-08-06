@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
-const getBackgroundColor = (mode, active) => {
-    if (!active) return "#310e0e";
-    switch (mode) {
+const getBackgroundColor = ($mode, $active) => {
+    if (!$active) return "#310e0e";
+    switch ($mode) {
       case "focus":
         return "#310e0e";
       case "shortBreak":
@@ -23,7 +23,7 @@ export const LabelContainer = styled.div`
   padding: 4px 15px;
   font-size: 16px;
   font-weight: bold;
-  background-color: ${(props) => getBackgroundColor(props.mode, props.active)};
+  background-color: ${(props) => getBackgroundColor(props.$mode, props.$active)};
   border: 2px solid white;
   border-radius: 90px;
   color: #fff;  
