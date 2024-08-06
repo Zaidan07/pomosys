@@ -78,7 +78,7 @@ export default function Timer() {
       setTime(25 * 60);
       
     } else if (mode === "shortBreak") {
-      setTime(5  * 0.6);
+      setTime(5  * 60);
     } else if (mode === "longBreak") {
       setTime(15 * 60);
     }
@@ -91,7 +91,7 @@ export default function Timer() {
     setStatus(Status.PAUSED);
     if (mode === "focus") {
       setMode("shortBreak");
-      setTime(5 * 0.6);
+      setTime(5 * 60);
       setBgPage("#040d06");
       setStartBg("#328c45");
       setBtBgRs("#0f2c15");
